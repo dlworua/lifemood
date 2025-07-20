@@ -1,19 +1,36 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:lifemood/firebase_options.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'view/pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MyApp());
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e, stack) {
+    print('🔥 Firebase init failed: $e');
+  }
+
+  runApp(const ProviderScope(child: LifeMoodApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LifeMoodApp extends StatelessWidget {
+  const LifeMoodApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp();
+    return MaterialApp(
+      title: 'Life Mood',
+      theme: ThemeData(
+        fontFamily: 'Pretendard',
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF8B5E3C)),
+        useMaterial3: true,
+      ),
+      home: HomePage(),
+    );
   }
 }
