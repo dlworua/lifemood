@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifemood/view/pages/feeling/feeling_editor_page.dart';
+import 'package:lifemood/view/pages/statistics/statistics_page.dart';
 import '../../view_model/feeling_view_model.dart';
 
 class HomePage extends ConsumerWidget {
@@ -49,6 +50,15 @@ class HomePage extends ConsumerWidget {
                 );
               },
               child: const Text('감정 기록하기'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StatisticsPage()),
+                );
+              },
+              child: const Text('감정 통계 보기'),
             ),
           ],
         ),
