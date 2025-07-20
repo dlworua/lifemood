@@ -1,30 +1,19 @@
-// lib/data/model/feeling_entry.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class FeelingEntry {
-  final String id;
-  final String content;
-  final DateTime createdAt;
+  final DateTime date;
+  final String emoji;
+  final String note;
 
-  FeelingEntry({
-    required this.id,
-    required this.content,
-    required this.createdAt,
-  });
+  FeelingEntry({required this.date, required this.emoji, required this.note});
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'content': content,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'date': date.toIso8601String(),
+    'emoji': emoji,
+    'note': note,
+  };
 
-  factory FeelingEntry.fromMap(Map<String, dynamic> map) {
-    return FeelingEntry(
-      id: map['id'] ?? '',
-      content: map['content'] ?? '',
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
-    );
-  }
+  factory FeelingEntry.fromJson(Map<String, dynamic> json) => FeelingEntry(
+    date: DateTime.parse(json['date']),
+    emoji: json['emoji'],
+    note: json['note'],
+  );
 }

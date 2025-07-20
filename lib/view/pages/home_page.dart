@@ -1,71 +1,81 @@
-// lib/view/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/model/feeling_entry.dart';
 import '../../view_model/feeling_view_model.dart';
+import '../widgets/emoji_selector.dart';
 
-class HomePage extends ConsumerWidget {
-  HomePage({super.key});
+class HomePage extends ConsumerStatefulWidget {
+  const HomePage({super.key});
 
+  @override
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  String? _selectedEmoji;
   final _controller = TextEditingController();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final feelings = ref.watch(feelingViewModelProvider);
-    final vm = ref.read(feelingViewModelProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Life Mood'),
-        backgroundColor: const Color(0xFF8B5E3C), // 브라운
-      ),
+      appBar: AppBar(title: const Text('LifeMood')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 입력창
+            const Text("오늘 하루, 당신의 감정은 어땠나요?"),
+            const SizedBox(height: 10),
+            EmojiSelector(
+              onEmojiSelected: (emoji) {
+                setState(() => _selectedEmoji = emoji);
+              },
+            ),
+            const SizedBox(height: 10),
             TextField(
               controller: _controller,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                hintText: '오늘의 기분이나 있었던 일을 적어보세요',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(hintText: '오늘을 간단히 기록해보세요'),
             ),
-            const SizedBox(height: 12),
-            // 저장 버튼
+            const SizedBox(height: 10),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFA726), // 오렌지
-              ),
-              onPressed: () async {
-                if (_controller.text.trim().isEmpty) return;
-
-                await vm.addFeeling(_controller.text.trim());
-                _controller.clear();
-                FocusScope.of(context).unfocus();
-              },
+              onPressed: _selectedEmoji == null
+                  ? null
+                  : () {
+                      final entry = FeelingEntry(
+                        date: DateTime.now(),
+                        emoji: _selectedEmoji!,
+                        note: _controller.text,
+                      );
+                      ref
+                          .read(feelingViewModelProvider.notifier)
+                          .addFeeling(entry);
+                      _controller.clear();
+                      setState(() => _selectedEmoji = null);
+                    },
               child: const Text('기록하기'),
             ),
-            const SizedBox(height: 24),
-            // 감정 리스트
+            const SizedBox(height: 20),
+            const Divider(),
+            const Text('오늘까지의 감정 기록'),
+            const SizedBox(height: 10),
             Expanded(
-              child: feelings.isEmpty
-                  ? const Center(child: Text('아직 기록이 없어요 🫥'))
-                  : ListView.builder(
-                      itemCount: feelings.length,
-                      itemBuilder: (context, index) {
-                        final feeling = feelings[index];
-                        return Card(
-                          color: const Color(0xFFFFF3E0), // 아이보리 느낌
-                          child: ListTile(
-                            title: Text(feeling.content),
-                            subtitle: Text(
-                              '${feeling.createdAt.year}-${feeling.createdAt.month.toString().padLeft(2, '0')}-${feeling.createdAt.day.toString().padLeft(2, '0')}',
-                            ),
-                          ),
-                        );
-                      },
+              child: ListView.builder(
+                itemCount: feelings.length,
+                itemBuilder: (context, index) {
+                  final entry = feelings[index];
+                  return ListTile(
+                    leading: Text(
+                      entry.emoji,
+                      style: const TextStyle(fontSize: 24),
                     ),
+                    title: Text(entry.note),
+                    subtitle: Text(
+                      entry.date.toIso8601String().substring(0, 10),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
