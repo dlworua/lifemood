@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/model/feeling_entry.dart';
+import 'package:lifemood/view/pages/calendar/calendar_page.dart';
+import 'package:lifemood/view/pages/feeling_editor_page.dart';
 import '../../view_model/feeling_view_model.dart';
-import '../widgets/emoji_selector.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -12,9 +12,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  String? _selectedEmoji;
-  final _controller = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     final feelings = ref.watch(feelingViewModelProvider);
@@ -25,37 +22,24 @@ class _HomePageState extends ConsumerState<HomePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text("오늘 하루, 당신의 감정은 어땠나요?"),
-            const SizedBox(height: 10),
-            EmojiSelector(
-              onEmojiSelected: (emoji) {
-                setState(() => _selectedEmoji = emoji);
-              },
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(hintText: '오늘을 간단히 기록해보세요'),
-            ),
-            const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _selectedEmoji == null
-                  ? null
-                  : () {
-                      final entry = FeelingEntry(
-                        date: DateTime.now(),
-                        emoji: _selectedEmoji!,
-                        note: _controller.text,
-                      );
-                      ref
-                          .read(feelingViewModelProvider.notifier)
-                          .addFeeling(entry);
-                      _controller.clear();
-                      setState(() => _selectedEmoji = null);
-                    },
-              child: const Text('기록하기'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FeelingEditorPage()),
+                );
+              },
+              child: const Text('감정 기록하기'),
             ),
-            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CalendarPage()),
+                );
+              },
+              child: const Text('감정 캘린더 보기'),
+            ),
             const Divider(),
             const Text('오늘까지의 감정 기록'),
             const SizedBox(height: 10),
