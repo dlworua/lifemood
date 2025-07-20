@@ -1,8 +1,10 @@
+// lib/view/pages/feeling/feeling_editor_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifemood/view/widgets/emoji_selector.dart';
-import '../../../data/model/feeling_entry.dart';
-import '../../../view_model/feeling_view_model.dart';
+import '../../../../data/model/feeling_entry.dart';
+import '../../../../view_model/feeling_view_model.dart';
 
 class FeelingEditorPage extends ConsumerStatefulWidget {
   const FeelingEditorPage({super.key});
@@ -35,7 +37,7 @@ class _FeelingEditorPageState extends ConsumerState<FeelingEditorPage> {
               controller: _controller,
               decoration: const InputDecoration(hintText: '오늘을 간단히 기록해보세요'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _selectedEmoji == null
                   ? null
@@ -48,9 +50,9 @@ class _FeelingEditorPageState extends ConsumerState<FeelingEditorPage> {
                       ref
                           .read(feelingViewModelProvider.notifier)
                           .addFeeling(entry);
-                      Navigator.pop(context); // 저장 후 홈으로 돌아가기
+                      Navigator.pop(context); // 홈으로 복귀
                     },
-              child: const Text('기록 완료'),
+              child: const Text('기록하기'),
             ),
           ],
         ),
