@@ -5,6 +5,7 @@ import 'package:lifemood/data/model/feeling_entry.dart';
 import 'package:lifemood/data/model/statistics_filter.dart';
 import 'package:lifemood/view_model/feeling_view_model.dart';
 import 'package:lifemood/view_model/statistics_view_model.dart';
+import 'package:lifemood/data/model/feeling_analysis.dart';
 
 class StatisticsPage extends ConsumerWidget {
   const StatisticsPage({super.key});
@@ -15,12 +16,12 @@ class StatisticsPage extends ConsumerWidget {
     final statsState = ref.watch(statisticsViewModelProvider);
     final statsVM = ref.read(statisticsViewModelProvider.notifier);
 
-    // 최초 진입 시 필터 적용 (빌드 중 직접 호출 금지)
-    ref.listen<List<FeelingEntry>>(feelingViewModelProvider, (previous, next) {
-      if (next.isNotEmpty) {
-        statsVM.applyFilter(next, statsState.filter);
-      }
-    });
+    // 최초 진입 시 필터 적용 (build에서 직접 호출 대신 Future.microtask로 딜레이)
+    if (statsState.filteredEntries.isEmpty && allFeelings.isNotEmpty) {
+      Future.microtask(() {
+        statsVM.applyFilter(allFeelings, statsState.filter);
+      });
+    }
 
     // PieChart 데이터 준비
     final frequency = <String, int>{};
@@ -33,7 +34,7 @@ class StatisticsPage extends ConsumerWidget {
         title: '${entry.key} (${entry.value})',
         value: entry.value.toDouble(),
         color: Colors.primaries[entry.key.hashCode % Colors.primaries.length],
-        radius: 60,
+        radius: 80,
         titleStyle: const TextStyle(fontSize: 14),
       );
     }).toList();
@@ -71,7 +72,7 @@ class StatisticsPage extends ConsumerWidget {
                     '가장 많이 사용한 감정',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10), // 제목과 차트 사이 간격을 30으로
                   Expanded(
                     child: PieChart(
                       PieChartData(
@@ -80,6 +81,11 @@ class StatisticsPage extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  _buildAnalysisMessage(
+                    statsState.filter,
+                    statsState.filteredEntries,
+                  ),
+                  SizedBox(height: 130),
                 ],
               ),
       ),
@@ -98,4 +104,16 @@ String _getFilterLabel(StatisticsFilter type) {
     case StatisticsFilter.year:
       return '올해';
   }
+}
+
+// 차트 아래에 분석 메시지 위젯
+Widget _buildAnalysisMessage(
+  StatisticsFilter filter,
+  List<FeelingEntry> entries,
+) {
+  return Text(
+    getFeelingAnalysisMessage(filter, entries),
+    style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+    textAlign: TextAlign.center,
+  );
 }

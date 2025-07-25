@@ -2,23 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifemood/view/pages/auth/login_page.dart';
 import 'package:lifemood/view/pages/auth/register_page.dart';
+import 'package:lifemood/view/pages/feeling/feeling_editor_page.dart';
+import 'package:lifemood/view/pages/home_page.dart';
+import 'package:lifemood/view/pages/service/notification_service.dart';
 import 'package:lifemood/view_model/auth_view_model.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'view/pages/home_page.dart';
 
-void main() async {
+/// Navigator 전역 접근을 위한 key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+  await initializeNotifications();
+
+  setNotificationClickHandler(() {
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => FeelingEditorPage(selectedDate: DateTime.now()),
+      ),
     );
-    // ignore: unused_catch_stack
-  } catch (e, stack) {
-    print('🔥 Firebase init failed: $e');
-    return; // Firebase 초기화 실패 시 앱 실행 중단
-  }
+  });
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const ProviderScope(child: LifeMoodApp()));
 }
@@ -33,6 +40,7 @@ class LifeMoodApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Lifemood',
+      navigatorKey: navigatorKey,
       routes: {'/register': (_) => const RegisterPage()},
       home: user == null ? const LoginPage() : const HomePage(),
     );
