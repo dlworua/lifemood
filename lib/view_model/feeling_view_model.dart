@@ -17,7 +17,16 @@ class FeelingViewModel extends StateNotifier<List<FeelingEntry>> {
   }
 
   Future<void> addFeeling(FeelingEntry entry) async {
-    await _repository.saveFeeling(entry);
-    state = [...state, entry];
+    // 저장 후 반환된 객체로 상태 업데이트
+    final savedEntry = await _repository.saveFeeling(entry);
+    state = [...state, savedEntry];
+  }
+
+  Future<void> updateFeeling(FeelingEntry entry) async {
+    await _repository.updateFeeling(entry);
+    state = [
+      for (final e in state)
+        if (e.id == entry.id) entry else e,
+    ];
   }
 }
