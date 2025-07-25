@@ -14,13 +14,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _passwordController = TextEditingController();
 
   void _register() async {
-    await ref
-        .read(authViewModelProvider.notifier)
-        .register(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
-    Navigator.pop(context); // 회원가입 후 로그인 페이지로 이동
+    try {
+      await ref
+          .read(authViewModelProvider.notifier)
+          .register(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('회원가입이 완료되었습니다.')));
+        await Future.delayed(const Duration(seconds: 1));
+        Navigator.pop(context); // 회원가입 후 로그인 페이지로 이동
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('회원가입 실패: \n${e.toString()}')));
+      }
+    }
   }
 
   @override

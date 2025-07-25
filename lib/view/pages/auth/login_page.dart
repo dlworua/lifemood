@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../view_model/auth_view_model.dart';
+import '../home_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -14,9 +15,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
 
   void _login() async {
-    await ref
-        .read(authViewModelProvider.notifier)
-        .signIn(_emailController.text.trim(), _passwordController.text.trim());
+    try {
+      await ref
+          .read(authViewModelProvider.notifier)
+          .signIn(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          );
+      final user = ref.read(authViewModelProvider);
+      print('로그인 성공: user = \n$user');
+      if (user != null && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('로그인에 성공했습니다.')));
+        await Future.delayed(const Duration(seconds: 1));
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: \n${e.toString()}')));
+      }
+    }
   }
 
   void _goToRegister(BuildContext context) {
